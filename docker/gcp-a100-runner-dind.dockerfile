@@ -19,19 +19,6 @@ RUN sudo chmod +x /usr/bin/switch-cuda.sh
 
 RUN sudo mkdir -p /workspace; sudo chown runner:runner /workspace
 
-# Install CUDA 11.6 and cudnn 8.3.2.44
-RUN cd /workspace && wget -q https://developer.download.nvidia.com/compute/cuda/11.6.2/local_installers/cuda_11.6.2_510.47.03_linux.run -O cuda_11.6.2_510.47.03_linux.run && \
-    sudo bash ./cuda_11.6.2_510.47.03_linux.run --toolkit --silent && \
-    rm -f cuda_11.6.2_510.47.03_linux.run
-RUN cd /workspace && wget -q https://developer.download.nvidia.com/compute/redist/cudnn/v8.3.2/local_installers/11.5/cudnn-linux-x86_64-8.3.2.44_cuda11.5-archive.tar.xz \
-    -O /workspace/cudnn-linux-x86_64-8.3.2.44_cuda11.5-archive.tar.xz && \
-    tar xJf cudnn-linux-x86_64-8.3.2.44_cuda11.5-archive.tar.xz && \
-    cd cudnn-linux-x86_64-8.3.2.44_cuda11.5-archive && \
-    sudo cp include/* /usr/local/cuda/include && \
-    sudo cp lib/* /usr/local/cuda/lib64 && \
-    sudo ldconfig && \
-    cd .. && rm -rf cudnn-linux-x86_64-8.3.2.44_cuda11.5-archive && rm -rf cudnn-linux-x86_64-8.3.2.44_cuda11.5-archive.tar.xz
-
 # Install CUDA 11.7 and cudnn 8.5.0.96
 RUN cd /workspace && wget -q https://developer.download.nvidia.com/compute/cuda/11.7.0/local_installers/cuda_11.7.0_515.43.04_linux.run -O cuda_11.7.0_515.43.04_linux.run && \
     sudo bash ./cuda_11.7.0_515.43.04_linux.run --toolkit --silent && \
@@ -51,8 +38,8 @@ RUN cd /workspace && wget -q https://developer.download.nvidia.com/compute/cuda/
 RUN cd /workspace && wget -q https://developer.download.nvidia.com/compute/redist/cudnn/v8.7.0/local_installers/11.8/cudnn-linux-x86_64-8.7.0.84_cuda11-archive.tar.xz -O cudnn-linux-x86_64-8.7.0.84_cuda11-archive.tar.xz && \
     tar xJf cudnn-linux-x86_64-8.7.0.84_cuda11-archive.tar.xz && \
     cd cudnn-linux-x86_64-8.7.0.84_cuda11-archive && \
-    sudo cp include/* /usr/local/cuda-11.7/include && \
-    sudo cp lib/* /usr/local/cuda-11.7/lib64 && \
+    sudo cp include/* /usr/local/cuda-11.8/include && \
+    sudo cp lib/* /usr/local/cuda-11.8/lib64 && \
     sudo ldconfig && \
     cd .. && rm -rf cudnn-linux-x86_64-8.7.0.84_cuda11-archive && rm -f cudnn-linux-x86_64-8.7.0.84_cuda11-archive.tar.xz
 RUN cd /workspace && mkdir tmp_nccl && cd tmp_nccl && \
@@ -80,12 +67,16 @@ RUN . ${HOME}/miniconda3/etc/profile.d/conda.sh && \
     conda install -y python=3.10 && \
     pip install unittest-xml-reporting pyyaml
 
+# Somehow ld couldn't find the libraries in /usr/local/nvidia/lib64 even if $LD_LIBRARY_PATH is set
+# Therefore, we copy all the NVIDIA driver libraries to /lib/x86_64-linux-gnu/
+RUN cp -r /usr/local/nvidia/lib64/* /lib/x86_64-linux-gnu/
+
 RUN echo "\
 export CONDA_HOME=\${HOME}/miniconda3\n\
 export NVIDIA_HOME=/usr/local/nvidia\n\
 export CUDA_HOME=/usr/local/cuda\n\
 export PATH=\${NVIDIA_HOME}/bin:\${CUDA_HOME}/bin\${PATH:+:\${PATH}}\n\
-export LD_LIBRARY_PATH=\${NVIDIA_HOME}/lib64:\${CUDA_HOME}/lib64\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}\n" >> ${HOME}/.bashrc
+export LD_LIBRARY_PATH=\${CUDA_HOME}/lib64\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}\n" >> ${HOME}/.bashrc
 
 RUN echo "\
 . \${HOME}/miniconda3/etc/profile.d/conda.sh\n\
@@ -94,4 +85,4 @@ export CONDA_HOME=\${HOME}/miniconda3\n\
 export NVIDIA_HOME=/usr/local/nvidia\n\
 export CUDA_HOME=/usr/local/cuda\n\
 export PATH=\${NVIDIA_HOME}/bin:\${CUDA_HOME}/bin\${PATH:+:\${PATH}}\n\
-export LD_LIBRARY_PATH=\${NVIDIA_HOME}/lib64:\${CUDA_HOME}/lib64\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}\n" >> /workspace/setup_instance.sh
+export LD_LIBRARY_PATH=\${CUDA_HOME}/lib64\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}\n" >> /workspace/setup_instance.sh
