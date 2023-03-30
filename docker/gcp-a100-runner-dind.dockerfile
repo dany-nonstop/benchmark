@@ -76,7 +76,8 @@ export CONDA_HOME=\${HOME}/miniconda3\n\
 export NVIDIA_HOME=/usr/local/nvidia\n\
 export CUDA_HOME=/usr/local/cuda\n\
 export PATH=\${NVIDIA_HOME}/bin:\${CUDA_HOME}/bin\${PATH:+:\${PATH}}\n\
-export LD_LIBRARY_PATH=\${CUDA_HOME}/lib64\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}\n" >> ${HOME}/.bashrc
+export LD_LIBRARY_PATH=\${CUDA_HOME}/lib64\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}\n\
+export LIBRARY_PATH=\${NVIDIA_HOME}/lib64:\${CUDA_HOME}/lib64\${LIBRARY_PATH:+:\${LIBRARY_PATH}}\n" >> ${HOME}/.bashrc
 
 RUN echo "\
 . \${HOME}/miniconda3/etc/profile.d/conda.sh\n\
@@ -85,4 +86,5 @@ export CONDA_HOME=\${HOME}/miniconda3\n\
 export NVIDIA_HOME=/usr/local/nvidia\n\
 export CUDA_HOME=/usr/local/cuda\n\
 export PATH=\${NVIDIA_HOME}/bin:\${CUDA_HOME}/bin\${PATH:+:\${PATH}}\n\
-export LD_LIBRARY_PATH=\${CUDA_HOME}/lib64\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}\n" >> /workspace/setup_instance.sh
+export LD_LIBRARY_PATH=\${NVIDIA_HOME}/lib64:\${CUDA_HOME}/lib64\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}\n\
+export LIBRARY_PATH=\${NVIDIA_HOME}/lib64:\${CUDA_HOME}/lib64\${LIBRARY_PATH:+:\${LIBRARY_PATH}}\n" >> /workspace/setup_instance.sh
